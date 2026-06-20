@@ -4,9 +4,12 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./quiz.db")
 
-# Railway (and Heroku) may provide postgres:// — SQLAlchemy requires postgresql://
+# Normalise postgres:// → postgresql+pg8000:// and postgresql:// → postgresql+pg8000://
+# pg8000 is a pure-Python driver with no native dependencies
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+pg8000://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
 
 # check_same_thread is SQLite-only
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
